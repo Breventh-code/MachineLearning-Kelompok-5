@@ -10,7 +10,7 @@
       <a href="{{ url_for('web.supervised') }}" class="button button-primary">Mulai klasifikasi <span aria-hidden="true">↗</span></a>
       <a href="{{ url_for('web.unsupervised') }}" class="button button-outline">Jelajahi clustering <span aria-hidden="true">→</span></a>
     </div>
-    <div class="hero-meta"><span><b>02</b> Paradigma ML</span><span class="meta-separator"></span><span><b>08</b> Fitur sinyal</span><span class="meta-separator"></span><span><b>01</b> Dashboard</span></div>
+    <div class="hero-meta"><span><b>02</b> Paradigma ML</span><span class="meta-separator"></span><span><b>09</b> Input fitur</span><span class="meta-separator"></span><span><b>01</b> Dashboard</span></div>
   </div>
   <div class="signal-card" aria-label="Ilustrasi visual gelombang sinyal getaran">
     <div class="signal-header"><div><span class="signal-title">VIBRATION SIGNAL</span><span class="signal-subtitle">Visualisasi ilustratif · bukan pembacaan sensor langsung</span></div><span class="live-pill">CWRU</span></div>
@@ -23,12 +23,12 @@
       </svg>
       <div class="signal-axis"><span>0.0 s</span><span>TIME SERIES / SAMPLE DATA</span><span>1.0 s</span></div>
     </div>
-    <div class="signal-bottom"><span><span class="tiny-dot"></span> FEATURE EXTRACTION READY</span><span>FFT / RMS / KURTOSIS</span></div>
+    <div class="signal-bottom"><span><span class="tiny-dot"></span> FEATURE EXTRACTION READY</span><span>RMS / SKEWNESS / KURTOSIS</span></div>
   </div>
 </section>
 
 <section class="section-block">
-  <div class="section-heading"><div><div class="eyebrow small">DUA MODUL · SATU SISTEM</div><h2>Pilih metode analisis</h2></div><p>Kedua model menggunakan delapan fitur numerik yang diekstraksi dari sinyal getaran bearing.</p></div>
+  <div class="section-heading"><div><div class="eyebrow small">DUA MODUL · SATU SISTEM</div><h2>Pilih metode analisis</h2></div><p>Kedua model menggunakan sembilan fitur input, dikembangkan menjadi 13 fitur scaled dari sinyal getaran bearing.</p></div>
   <div class="cards-grid">
     <article class="feature-card">
       <div class="card-head"><span class="card-index">01 / SUPERVISED</span><span class="icon-square">▦</span></div>
@@ -48,6 +48,6 @@
 </section>
 <section class="workflow-section">
   <div><span class="eyebrow small">PIPELINE PROJECT</span><h2>Dari data ke keputusan</h2><p>Alur sistem dirancang agar feature engineering, model training, dan aplikasi web tetap konsisten.</p></div>
-  <div class="workflow-steps"><div><span>01</span><strong>CWRU Dataset</strong><small>Sinyal getaran bearing</small></div><b>→</b><div><span>02</span><strong>Feature Extraction</strong><small>8 fitur numerik</small></div><b>→</b><div><span>03</span><strong>Model Inference</strong><small>Random Forest / K-Means</small></div><b>→</b><div><span>04</span><strong>Web Dashboard</strong><small>Output dan visualisasi</small></div></div>
+  <div class="workflow-steps"><div><span>01</span><strong>CWRU Dataset</strong><small>Sinyal getaran bearing</small></div><b>→</b><div><span>02</span><strong>Feature Extraction</strong><small>9 input → 13 fitur</small></div><b>→</b><div><span>03</span><strong>Model Inference</strong><small>Random Forest / K-Means</small></div><b>→</b><div><span>04</span><strong>Web Dashboard</strong><small>Output dan visualisasi</small></div></div>
 </section>
 {% endblock %}

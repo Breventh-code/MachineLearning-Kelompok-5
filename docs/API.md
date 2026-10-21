@@ -1,47 +1,38 @@
-# Dokumentasi API SmartBearing
+# SmartBearing REST API — 4 kelas, 9 input → 13 fitur scaled
 
-Server lokal: `http://127.0.0.1:5000`.
+Jalankan `python app.py` lalu buka `http://127.0.0.1:5000`.
 
 ## GET /api/status
 
-Menampilkan kesiapan model dan `feature_order` yang wajib sama dengan fitur pelatihan.
+Menampilkan kesiapan dua model dan urutan **9 fitur input web**. Model akan berstatus belum siap sebelum CSV diproses dan kedua `.pkl` tersedia.
 
-## POST /api/predict/supervised
-## POST /api/predict/unsupervised
+## POST /api/predict/supervised dan /api/predict/unsupervised
 
-Kirim `Content-Type: application/json` dan JSON dengan 8 fitur.
-**Nilai di bawah hanya contoh struktur request sintetis; bukan cuplikan CWRU dan bukan hasil ekstraksi sebenarnya.**
+Request (`application/json`) berisi 9 fitur dasar CWRU seperti contoh **format sintetis** berikut (bukan sampel dataset asli):
 
 ```json
 {
   "features": {
-    "rms": 0.1,
-    "std_dev": 0.11,
-    "peak_to_peak": 0.6,
-    "kurtosis": 3.0,
-    "skewness": 0.2,
-    "crest_factor": 3.4,
-    "signal_energy": 20.0,
-    "dominant_frequency": 123.0
+    "max": 0.8,
+    "min": -0.7,
+    "mean": 0.02,
+    "sd": 0.3,
+    "rms": 0.31,
+    "skewness": 0.08,
+    "kurtosis": 3.2,
+    "crest": 2.58,
+    "form": 1.15
   }
 }
 ```
 
-- `200`: prediksi sukses (ketika model tepercaya sudah dipasang).
-- `400`: format request/fitur tidak valid.
-- `503`: file model `.pkl` belum terpasang atau gagal dimuat.
-- `500`: kesalahan inferensi, misalnya nama fitur tidak sama dengan training.
+Backend memvalidasi 9 input, menghitung `peak_to_peak`, `abs_peak`, `energy = rms**2` (mean square), `sd_rms_ratio`, lalu menerapkan `scaler.pkl` menjadi **13 fitur** sesuai `feature_list.json`. Model ML harus sudah dilatih pada CSV scaled 13 fitur tanpa scaler kedua.
 
-Respons sukses supervised berisi `result.prediction`, `result.label`, dan `result.probabilities` jika classifier punya `predict_proba`.
+- `200`: prediksi berhasil setelah kedua artefak preprocessing dan model tersedia.
+- `400`: input JSON atau fitur tidak valid.
+- `503`: model atau artefak preprocessing belum tersedia/tidak kompatibel.
+- `500`: error dalam preprocessing atau prediksi.
 
-Respons sukses unsupervised berisi `result.cluster`, `result.label`, dan `result.distances` jika model punya `transform`. Jarak adalah jarak dalam ruang fitur setelah transformasi pipeline bila digunakan.
-
-## Contoh cURL
-
-```bash
-curl -X POST http://127.0.0.1:5000/api/predict/supervised \
-  -H "Content-Type: application/json" \
-  -d '{"features":{"rms":0.1,"std_dev":0.11,"peak_to_peak":0.6,"kurtosis":3,"skewness":0.2,"crest_factor":3.4,"signal_energy":20,"dominant_frequency":123}}'
-```
-
-Jika file `.pkl` belum tersedia, respons yang benar adalah `503`, bukan hasil prediksi palsu.
+Supervised: `result.prediction`, `result.label`, `result.probabilities`.
+Unsupervised: `result.cluster`, `result.label`, `result.distances`.
+Cluster tidak boleh diperlakukan sebagai label kerusakan tanpa analisis tambahan.

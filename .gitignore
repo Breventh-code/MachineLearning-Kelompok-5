@@ -1,3 +1,4 @@
+# Python and local environment
 .venv/
 venv/
 __pycache__/
@@ -7,7 +8,17 @@ __pycache__/
 .env
 .DS_Store
 Thumbs.db
-models/*.pkl
-data/raw/
-data/*.csv
-!.gitkeep
+
+# Never commit source datasets and generated CSVs
+/data/raw/*
+!/data/raw/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+/data/*.csv
+
+# Trained or fitted binary artifacts are handled separately
+/models/*.pkl
+
+# Optional notebook data artifacts
+*.h5
+*.mat

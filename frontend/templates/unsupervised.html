@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Unsupervised Learning{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/analysis.js') }}" defer></script>{% endblock %}
+{% block content %}
+<section class="page-heading"><div><span class="eyebrow"><span class="eyebrow-line"></span> MODULE 02 / UNSUPERVISED LEARNING</span><h1>Jelajahi pola <span class="gradient-word">kondisi bearing.</span></h1><p>Model K-Means mengelompokkan kondisi bearing berdasarkan kemiripan karakteristik fitur sinyal getaran tanpa menggunakan label saat prediksi.</p></div><span class="algorithm-tag">K-Means <span>↗</span></span></section>
+<div class="status-bar"><div class="status-summary"><span class="online-dot"></span><strong>Status model unsupervised</strong></div><span data-model-status="unsupervised" role="status">Memeriksa model…</span></div>
+<section class="analysis-layout"><div class="form-panel">{% set mode = 'unsupervised' %}{% set endpoint = url_for('web.unsupervised_api') %}{% set button_text = 'Cari cluster' %}{% include '_feature_form.html' %}</div><div>{% set result_label = 'clustering' %}{% include '_result.html' %}<div class="side-note"><b>Interpretasi output</b><p>Cluster 0, 1, 2, dan seterusnya merupakan pengelompokan berdasarkan jarak fitur. <strong>Cluster bukan kelas kerusakan</strong> tanpa analisis yang memvalidasinya.</p></div></div></section>
+{% endblock %}

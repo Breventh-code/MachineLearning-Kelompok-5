@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Halaman Tidak Ditemukan{% endblock %}
+{% block content %}
+<section class="not-found"><span class="eyebrow small">ERROR / 404</span><h1>Halaman tidak ditemukan.</h1><p>Alamat yang kamu buka tidak tersedia di SmartBearing.</p><a class="button button-primary" href="{{ url_for('web.home') }}">Kembali ke Beranda →</a></section>
+{% endblock %}

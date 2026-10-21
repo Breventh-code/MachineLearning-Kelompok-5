@@ -1,0 +1,12 @@
+<div class="result-panel" id="resultPanel">
+  <div class="result-head"><span class="eyebrow small">OUTPUT MODEL</span><span class="placeholder-indicator">HASIL ANALISIS</span></div>
+  <div id="resultEmpty" class="empty-result"><div class="empty-icon">◎</div><h3>Menunggu input fitur</h3><p>Hasil {{ result_label }} dan grafik akan muncul setelah input divalidasi dan model berjalan.</p></div>
+  <div id="resultLoaded" class="is-hidden">
+    <div class="output-label" id="predictionCaption">HASIL</div>
+    <div class="prediction-pill" id="predictionLabel" aria-live="polite">—</div>
+    <p class="prediction-explain" id="predictionNote"></p>
+    <div class="chart-topline"><h3 id="chartTitle">Grafik model</h3><span class="small-indicator">BERDASARKAN MODEL</span></div>
+    <div class="plot-wrap"><canvas id="resultChart" role="img" aria-label="Grafik hasil prediksi"></canvas></div>
+    <p id="chartFootnote" class="chart-footnote"></p>
+  </div>
+</div>

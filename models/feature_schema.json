@@ -1,0 +1,19 @@
+{
+  "description": "Delapan fitur baseline yang diekstraksi per window getaran bearing CWRU. Pastikan nama dan urutan IDENTIK dengan pipeline training.",
+  "features": [
+    {"name": "rms", "label": "RMS", "hint": "Root Mean Square amplitudo getaran.", "min": 0},
+    {"name": "std_dev", "label": "Standard Deviation", "hint": "Simpangan baku amplitudo getaran.", "min": 0},
+    {"name": "peak_to_peak", "label": "Peak-to-Peak", "hint": "Selisih amplitudo maksimum dan minimum.", "min": 0},
+    {"name": "kurtosis", "label": "Kurtosis", "hint": "Kurtosis, sesuai definisi (excess/non-excess) saat training."},
+    {"name": "skewness", "label": "Skewness", "hint": "Kemiringan distribusi amplitudo getaran."},
+    {"name": "crest_factor", "label": "Crest Factor", "hint": "Rasio nilai absolut puncak terhadap RMS.", "min": 0},
+    {"name": "signal_energy", "label": "Signal Energy", "hint": "Jumlah kuadrat amplitudo dalam satu window.", "min": 0},
+    {"name": "dominant_frequency", "label": "Dominant Frequency (Hz)", "hint": "Frekuensi dominan dari FFT sinyal.", "min": 0}
+  ],
+  "class_labels": {
+    "0": "Normal",
+    "1": "Inner Race Fault",
+    "2": "Outer Race Fault",
+    "3": "Ball Fault"
+  }
+}

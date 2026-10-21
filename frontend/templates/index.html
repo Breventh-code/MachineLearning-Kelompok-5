@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Beranda{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow"><span class="eyebrow-line"></span> INTELLIGENT MACHINE DIAGNOSTICS</span>
+    <h1>Kenali kondisi bearing melalui <span class="gradient-word">data getaran.</span></h1>
+    <p class="hero-lead">Eksplorasi machine learning untuk klasifikasi kerusakan dan pengelompokan kondisi bearing menggunakan dataset CWRU, dalam satu aplikasi.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('web.supervised') }}" class="button button-primary">Mulai klasifikasi <span aria-hidden="true">↗</span></a>
+      <a href="{{ url_for('web.unsupervised') }}" class="button button-outline">Jelajahi clustering <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hero-meta"><span><b>02</b> Paradigma ML</span><span class="meta-separator"></span><span><b>08</b> Fitur sinyal</span><span class="meta-separator"></span><span><b>01</b> Dashboard</span></div>
+  </div>
+  <div class="signal-card" aria-label="Ilustrasi visual gelombang sinyal getaran">
+    <div class="signal-header"><div><span class="signal-title">VIBRATION SIGNAL</span><span class="signal-subtitle">Visualisasi ilustratif · bukan pembacaan sensor langsung</span></div><span class="live-pill">CWRU</span></div>
+    <div class="signal-visual">
+      <div class="chart-grid"></div>
+      <svg viewBox="0 0 500 195" preserveAspectRatio="none" role="img" aria-label="Gambar ilustrasi gelombang getaran">
+        <defs><linearGradient id="lineFade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3177c8"/><stop offset=".6" stop-color="#46d9b2"/><stop offset="1" stop-color="#9ce6bb"/></linearGradient><linearGradient id="signalFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#41d7b5" stop-opacity=".25"/><stop offset="1" stop-color="#41d7b5" stop-opacity="0"/></linearGradient></defs>
+        <path d="M0 106 L14 103 L25 110 L35 93 L47 104 L61 112 L70 78 L80 121 L92 91 L106 108 L118 90 L129 123 L145 110 L153 56 L161 144 L173 78 L183 113 L195 99 L204 106 L218 82 L229 130 L240 100 L251 110 L260 31 L270 160 L281 79 L292 112 L303 94 L314 107 L324 77 L336 133 L350 96 L361 111 L372 74 L383 122 L393 98 L402 106 L416 50 L428 154 L440 89 L451 112 L464 97 L477 103 L489 99 L500 105 L500 195 L0 195 Z" fill="url(#signalFill)" />
+        <path d="M0 106 L14 103 L25 110 L35 93 L47 104 L61 112 L70 78 L80 121 L92 91 L106 108 L118 90 L129 123 L145 110 L153 56 L161 144 L173 78 L183 113 L195 99 L204 106 L218 82 L229 130 L240 100 L251 110 L260 31 L270 160 L281 79 L292 112 L303 94 L314 107 L324 77 L336 133 L350 96 L361 111 L372 74 L383 122 L393 98 L402 106 L416 50 L428 154 L440 89 L451 112 L464 97 L477 103 L489 99 L500 105" fill="none" stroke="url(#lineFade)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="signal-axis"><span>0.0 s</span><span>TIME SERIES / SAMPLE DATA</span><span>1.0 s</span></div>
+    </div>
+    <div class="signal-bottom"><span><span class="tiny-dot"></span> FEATURE EXTRACTION READY</span><span>FFT / RMS / KURTOSIS</span></div>
+  </div>
+</section>
+
+<section class="section-block">
+  <div class="section-heading"><div><div class="eyebrow small">DUA MODUL · SATU SISTEM</div><h2>Pilih metode analisis</h2></div><p>Kedua model menggunakan delapan fitur numerik yang diekstraksi dari sinyal getaran bearing.</p></div>
+  <div class="cards-grid">
+    <article class="feature-card">
+      <div class="card-head"><span class="card-index">01 / SUPERVISED</span><span class="icon-square">▦</span></div>
+      <h3>Fault Classification</h3><p>Gunakan model Random Forest untuk mengklasifikasikan kondisi bearing berdasarkan fitur sinyal getaran.</p>
+      <div class="chip-row"><span>Random Forest</span><span>Classification</span></div>
+      <div class="model-state" data-model-status="supervised" role="status">Memeriksa model…</div>
+      <a class="card-link" href="{{ url_for('web.supervised') }}">Buka modul <span>↗</span></a>
+    </article>
+    <article class="feature-card">
+      <div class="card-head"><span class="card-index">02 / UNSUPERVISED</span><span class="icon-square">◉</span></div>
+      <h3>Condition Clustering</h3><p>Gunakan K-Means untuk mempelajari pengelompokan kondisi bearing berdasarkan kemiripan fitur.</p>
+      <div class="chip-row"><span>K-Means</span><span>Clustering</span></div>
+      <div class="model-state" data-model-status="unsupervised" role="status">Memeriksa model…</div>
+      <a class="card-link" href="{{ url_for('web.unsupervised') }}">Buka modul <span>↗</span></a>
+    </article>
+  </div>
+</section>
+<section class="workflow-section">
+  <div><span class="eyebrow small">PIPELINE PROJECT</span><h2>Dari data ke keputusan</h2><p>Alur sistem dirancang agar feature engineering, model training, dan aplikasi web tetap konsisten.</p></div>
+  <div class="workflow-steps"><div><span>01</span><strong>CWRU Dataset</strong><small>Sinyal getaran bearing</small></div><b>→</b><div><span>02</span><strong>Feature Extraction</strong><small>8 fitur numerik</small></div><b>→</b><div><span>03</span><strong>Model Inference</strong><small>Random Forest / K-Means</small></div><b>→</b><div><span>04</span><strong>Web Dashboard</strong><small>Output dan visualisasi</small></div></div>
+</section>
+{% endblock %}

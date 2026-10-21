@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1221">
+  <meta name="description" content="SmartBearing: demonstrasi analisis kerusakan bearing CWRU dengan Random Forest dan K-Means berbasis web.">
+  <title>{% block title %}SmartBearing{% endblock %} • CWRU Machine Learning</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/common.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</head>
+<body>
+  <div class="site-grid"></div>
+  <header class="topbar">
+    <div class="shell nav-layout">
+      <a class="logo" href="{{ url_for('web.home') }}" aria-label="SmartBearing - Beranda">
+        <span class="brand-icon" aria-hidden="true"><span></span></span>
+        <span>Smart<span class="accent">Bearing</span><small>CWRU / ML SYSTEM</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a {% if page == 'home' %}aria-current="page"{% endif %} href="{{ url_for('web.home') }}">Beranda</a>
+        <a {% if page == 'supervised' %}aria-current="page"{% endif %} href="{{ url_for('web.supervised') }}">Supervised</a>
+        <a {% if page == 'unsupervised' %}aria-current="page"{% endif %} href="{{ url_for('web.unsupervised') }}">Unsupervised</a>
+        <a {% if page == 'about' %}aria-current="page"{% endif %} href="{{ url_for('web.about') }}">Tentang</a>
+      </nav>
+      <div class="topbar-tag"><span class="online-dot"></span> LOCAL APPLICATION</div>
+    </div>
+  </header>
+
+  <main class="shell main-content" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="shell footer-inner">
+      <span>© SmartBearing · Machine Learning Project</span>
+      <span>Case Western Reserve University Bearing Dataset · Untuk pembelajaran</span>
+    </div>
+  </footer>
+</body>
+</html>

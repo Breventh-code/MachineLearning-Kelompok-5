@@ -1,0 +1,16 @@
+<form id="featureForm" class="feature-form" data-mode="{{ mode }}" data-endpoint="{{ endpoint }}" novalidate>
+  <div class="form-title-row"><div><h2>Input fitur getaran</h2><p>Masukkan delapan fitur dari satu window sinyal yang sudah diproses Data Engineer.</p></div><span class="form-counter">08 FITUR</span></div>
+  <div class="feature-grid">
+    {% for field in feature_fields %}
+    <label class="field">
+      <span class="field-label">{{ field.label }} <span class="required">*</span></span>
+      <input type="number" name="{{ field.name }}" inputmode="decimal" step="any" {% if field.min is defined %}min="{{ field.min }}"{% endif %} placeholder="Masukkan angka" required aria-describedby="hint-{{ field.name }}">
+      <small id="hint-{{ field.name }}">{{ field.hint }}</small>
+      <span class="field-error" data-error-for="{{ field.name }}"></span>
+    </label>
+    {% endfor %}
+  </div>
+  <div class="form-notice"><span class="notice-symbol">i</span><p>Gunakan nilai hasil ekstraksi fitur CWRU. Data mentah `.mat` tidak dapat langsung ditempel sebagai nilai fitur.</p></div>
+  <div class="form-actions"><button class="button button-primary" id="submitBtn" type="submit">{{ button_text }} <span>→</span></button><button class="button button-quiet" type="reset">Kosongkan</button></div>
+  <div id="apiError" class="alert-box is-hidden" role="alert" aria-live="assertive"></div>
+</form>

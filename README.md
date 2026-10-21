@@ -1,108 +1,79 @@
-# SmartBearing CWRU — Flask Web Project
+# SmartBearing CWRU — Web + Preprocessing Terintegrasi
 
-Starter **backend + frontend terstruktur** untuk proyek deteksi kerusakan bearing CWRU dengan dua paradigma:
+**Versi gabungan** dari backend/frontend Flask dan notebook/script preprocessing CWRU final. Mendukung **Supervised (Random Forest)** dan **Unsupervised (K-Means)**. Web tetap bisa dibuka sebelum model ML ada; API prediksi memberi HTTP 503 sampai model & scaler tersedia, tanpa prediksi tiruan.
 
-- **Supervised:** klasifikasi fault menggunakan model Random Forest dari ML Engineer 1.
-- **Unsupervised:** clustering fitur getaran dengan K-Means dari ML Engineer 2.
+## Persyaratan dataset
 
-Frontend responsif menggunakan HTML, CSS, JavaScript vanilla dan grafik Canvas bawaan browser, tanpa ketergantungan CDN.
+Sumber: https://www.kaggle.com/datasets/brjapon/cwru-bearing-datasets
 
-## Status isi ZIP
+Dataset yang dipakai di notebook adalah CSV feature-based `feature_time_48k_2048_load_1.csv`. **File CSV asli tidak disertakan**: download dari Kaggle lalu tempatkan ke `data/raw/`. Bukan parser `.mat` mentah.
 
-✅ Server Flask, empat halaman web, validasi 8 fitur, dua endpoint prediksi, status model, visualisasi prediksi, halaman error, tes API.
+- Klasifikasi: **4 kelas** `Ball`, `IR`, `Normal`, `OR`.
+- Form web: **9 fitur dasar** `max`, `min`, `mean`, `sd`, `rms`, `skewness`, `kurtosis`, `crest`, `form`.
+- Backend: menghitung **4 fitur turunan** `peak_to_peak`, `abs_peak`, `energy` (= RMS kuadrat/mean square), `sd_rms_ratio`.
+- ML model: menerima **13 fitur yang sudah di-scaling**, urutan `models/feature_list.json`.
+- Nama file hasil training: `models/random_forest_pipeline.pkl` dan `models/kmeans_pipeline.pkl` (meski memakai akhiran "pipeline", model boleh berisi estimator saja setelah data scaled).
 
-⚠️ **Tidak menyertakan model `.pkl` atau dataset CWRU asli.** Selama model belum dipasang, website tetap terbuka dan form mengirim pesan jelas `503 Model belum tersedia`. Tidak ada prediksi tiruan.
+## Cara menjalankan di Windows (PowerShell)
 
-## Menjalankan di Windows (PowerShell)
-
-Buka terminal di folder `smartbearing-cwru-web`, lalu:
+Dari folder proyek:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
+# Tempatkan CSV Kaggle ke data/raw/ terlebih dahulu
+python preprocessing.py --data-dir data
 python app.py
 ```
 
-Jika PowerShell memblokir aktivasi, gunakan Command Prompt dan `.venv\Scripts\activate.bat` atau jalankan `.venv\Scripts\python.exe app.py` setelah instal dependensi.
+Jika PowerShell menolak aktivasi, gunakan `.venv\Scripts\python.exe` sebagai awalan tiap perintah, atau Command Prompt. Untuk EDA buka `notebooks/CWRU_EDA_Preprocessing_Final.ipynb`, lalu **Run All** setelah menyediakan CSV.
 
-Alternatif: jalankan `run_windows.bat`.
+Buka http://127.0.0.1:5000 — Home / Supervised / Unsupervised / About.
 
-Buka **http://127.0.0.1:5000**.
+## Output preprocessing
 
-### Linux/macOS
+- `data/processed/{cwru_clean,train_scaled,test_scaled,split_manifest}.csv`
+- `data/processed/preprocessing_summary.json`
+- `models/{scaler,label_encoder}.pkl`
+- `models/feature_list.json`
+- `models/feature_schema.json` (menggantikan schema lama 8 fitur)
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python app.py
-```
+## Penyerahan ke ML Engineer
 
-## Integrasi dengan 2 model dari tim ML
+1. Data Engineer menjalankan preprocessing dan membagikan `train_scaled.csv`, `test_scaled.csv`, `label_encoder.pkl`, dan `feature_list.json`.
+2. ML Engineer 1 melatih Random Forest dengan `X=train.drop(columns=['label'])`, `y=train['label']`, mengevaluasi pada test dan menyimpan estimator trained ke `models/random_forest_pipeline.pkl`.
+3. ML Engineer 2 melakukan K-Means pada 13 fitur dari data training **tanpa label**, memilih jumlah cluster dengan evaluasi clustering, dan menyimpan model ke `models/kmeans_pipeline.pkl`.
+4. Training HARUS menggunakan fitur scaled dari `train_scaled.csv`. **Jangan memfit StandardScaler tambahan** di dalam estimator/pipeline jika memakai file ini; web menerapkan scaler Data Engineer sekali.
+5. Backend akan menerjemahkan label menggunakan `label_encoder.pkl`, bukan mapping label lama hard-coded.
+6. Jalankan `python -m pytest -q` untuk memeriksa kode. Cek `/api/status` dan tes form web setelah `.pkl` model tersedia.
 
-1. Data Engineer menyiapkan fitur, berurutan:
-   `rms`, `std_dev`, `peak_to_peak`, `kurtosis`, `skewness`, `crest_factor`, `signal_energy`, `dominant_frequency`.
-2. ML Engineer 1 melatih dan mengekspor **pipeline** yang menerima `pandas.DataFrame` dengan kolom tersebut ke `models/random_forest_pipeline.pkl`.
-3. ML Engineer 2 melatih pipeline `StandardScaler → KMeans` ke `models/kmeans_pipeline.pkl`.
-4. Periksa **class encoding** di `models/feature_schema.json` dan samakan dengan training. Mapping default hanya usulan.
-5. Jika fitur akhir tim berbeda, perbarui **`models/feature_schema.json`** dan samakan dengan kolom model. Pastikan satuan/definisi fitur juga konsisten.
-6. Refresh halaman; cek status model di Home atau endpoint `/api/status`.
-7. Masukkan delapan fitur yang **benar-benar diekstraksi dari sinyal CWRU**. Jangan masukkan sinyal mentah sebagai fitur dan jangan anggap input numerik sebarang sebagai diagnosis nyata.
-
-> `joblib.load` hanya untuk model buatan tim atau berkas yang dipercaya. Versi library training dan inference sebaiknya cocok. K-Means cluster tidak otomatis setara kelas kerusakan.
-
-## Folder utama
+## Struktur folder
 
 ```text
 smartbearing-cwru-web/
-├── app.py                        # entry point Flask
-├── backend/
-│   ├── __init__.py               # create_app
-│   ├── routes.py                 # routes halaman dan API
-│   ├── schema.py                 # metadata fitur
-│   ├── validators.py             # validasi JSON
-│   └── model_service.py          # load model dan prediksi
-├── frontend/
-│   ├── templates/                # Jinja2 HTML
-│   └── static/
-│       ├── css/style.css
-│       └── js/                    # interaksi dan grafik
-├── models/
-│   ├── feature_schema.json
-│   └── README.md
-├── data/README.md
+├── app.py
+├── preprocessing.py
+├── notebooks/CWRU_EDA_Preprocessing_Final.ipynb
+├── backend/{schema.py, validators.py, model_service.py, routes.py}
+├── frontend/templates/
+├── frontend/static/{css/,js/}
+├── data/{raw/,processed/,README.md}
+├── models/{feature_schema.json,README.md}  # fitted model .pkl generated later
 ├── docs/API.md
 ├── tests/test_app.py
-└── requirements.txt
+├── requirements.txt
+└── .gitignore
 ```
 
-## Endpoint
+## Penempatan di repository GitHub yang sudah ada
 
-| Endpoint | Metode | Fungsi |
-|---|---|---|
-| `/` | GET | Home |
-| `/supervised` | GET | Form klasifikasi |
-| `/unsupervised` | GET | Form clustering |
-| `/about` | GET | Informasi proyek |
-| `/api/health` | GET | Kesehatan service + status model |
-| `/api/status` | GET | Kesiapan 2 model & urutan fitur |
-| `/api/predict/supervised` | POST | Klasifikasi Random Forest |
-| `/api/predict/unsupervised` | POST | K-Means clustering |
+Arsip memiliki nama folder teratas **`smartbearing-cwru-web/` sama seperti ZIP lama** agar bisa diekstrak di folder induk yang sama, lalu pilih **Replace/Overwrite** untuk file terkait. Jangan menghapus folder `.git` pada proyek lokal. Sebaiknya lakukan backup commit dahulu, periksa `git status` dan `git diff`, lalu commit dan push perubahan dari branch tim.
 
-Lihat `docs/API.md` untuk contoh format JSON dan respons.
+## Batasan penting
 
-## Testing
-
-```bash
-python -m pytest -q
-```
-
-Test bawaan memvalidasi halaman, penolakan input bermasalah dan kontrak respons API dengan mock prediksi. Untuk test model sungguhan, tambahkan tes menggunakan pipeline `.pkl` hasil training.
-
-## Batasan
-
-- Ini proyek pendidikan untuk *data historis CWRU*, bukan monitoring sensor real-time.
-- Upload sinyal `.mat` dan feature extraction otomatis dari file belum disertakan; pekerjaan itu menjadi antarmuka pengembangan berikutnya dengan Data Engineer.
-- Saat integrasi, cek potensi *data leakage* dari pembagian window sinyal yang berasal dari rekaman sama.
-- Gunakan server WSGI yang sesuai saat production, bukan `debug=True`.
+- ZIP **tidak menyertakan CSV dataset asli** atau model `.pkl` hasil training.
+- CSV CWRU sudah berupa fitur tabular; aplikasi tidak merekam sensor real-time ataupun mengimpor `.mat` langsung.
+- `train_test_split(..., stratify=y)` bekerja pada baris/window, **bukan berdasarkan recording_id asli**. Metrik test tidak otomatis merepresentasikan kemampuan generalisasi ke rekaman baru.
+- Ini aplikasi edukasi, bukan alat diagnosis industri tersertifikasi.
+- `joblib` / `.pkl` hanya boleh digunakan untuk file yang tepercaya; usahakan lingkungan training dan runtime memakai versi library yang kompatibel.

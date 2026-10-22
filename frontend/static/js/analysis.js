@@ -141,39 +141,29 @@
     );
   }
 
-  // Interpretasi khusus untuk model K-Means saat ini berdasarkan tabulasi 460 data testing
-  // yang diberikan tim: Cluster 0 (Ball 138, IR 105, Normal 46, OR 46),
-  // Cluster 1 (OR 92, IR 33). Jangan perlakukan komposisi ini sebagai probabilitas input.
+  // Profil cluster dibaca dari server. Hanya ditampilkan jika SHA model cocok
+  // dengan tabel evaluasi 460 sampel; ini BUKAN probabilitas label input.
   function unsupervisedExplanation(result) {
     const cluster = Number(result.cluster);
-    const descriptions = {
-      0: {
-        title: 'Cluster 0 — Kelompok Pola Getaran Campuran',
-        description: 'Sampel ini lebih dekat ke centroid Cluster 0. Pada evaluasi 460 data testing, Cluster 0 berisi 138 Ball, 105 Inner Race, 46 Normal, dan 46 Outer Race. Artinya kelompok ini memiliki campuran kondisi, bukan kelompok bearing normal.',
-        detail: 'Komposisi dalam Cluster 0: Ball 41,2%, IR 31,3%, Normal 13,7%, dan OR 13,7% (total 335 data). Ini adalah proporsi data evaluasi, bukan peluang kondisi untuk input yang sedang diuji.'
-      },
-      1: {
-        title: 'Cluster 1 — Kelompok yang Didominasi Outer Race',
-        description: 'Sampel ini lebih dekat ke centroid Cluster 1. Pada evaluasi 460 data testing, Cluster 1 memuat 92 sampel Outer Race dan 33 Inner Race; tidak ada sampel Ball atau Normal.',
-        detail: 'Komposisi dalam Cluster 1: OR 73,6% dan IR 26,4% (total 125 data). Dominasi OR tidak berarti input ini pasti mengalami Outer Race Fault.'
-      }
-    };
-    const interpretation = descriptions[cluster] || {
-      title: `Cluster ${Number.isFinite(cluster) ? cluster : 'tidak diketahui'} — Kelompok Getaran`,
-      description: 'Model K-Means menempatkan input pada centroid yang paling dekat dalam ruang fitur. Interpretasi komposisi kelas untuk nomor cluster ini belum tersedia.',
-      detail: 'Untuk mengetahui karakter cluster baru, bandingkan hasil clustering dengan label data testing dalam tabel silang.'
-    };
-    const distances = Array.isArray(result.distances) ? result.distances : [];
-    const chosen = distances.find(item => Number(item.cluster) === cluster);
-    const distance = chosen ? Number(chosen.distance) : NaN;
-    const distanceNote = Number.isFinite(distance)
-      ? ` Jarak ke centroid terpilih: ${distance.toFixed(3)} pada ruang fitur terskala. Nilai ini bukan persentase keyakinan ataupun tingkat kerusakan.`
-      : ' Jarak centroid tidak tersedia untuk hasil ini.';
+    const profile = result.cluster_profile;
+    if (!profile || !Array.isArray(profile.composition)) {
+      updateInterpretation(
+        `BIRCH — Cluster ${cluster}`,
+        'Input dikelompokkan berdasarkan kemiripan 13 fitur terstandardisasi. Profil historis cluster tidak tersedia untuk versi model ini.',
+        'Jangan menganggap nomor cluster sebagai label Normal, Ball, IR, ataupun OR.',
+        'Jika model telah di-training ulang, buat ulang birch_cluster_profiles.json dari data testing sebelum menampilkan statistik komposisi.'
+      );
+      return;
+    }
+    const mix = profile.composition
+      .filter(item => Number(item.count) > 0)
+      .map(item => `${item.label} ${item.count} (${(Number(item.share) * 100).toFixed(1)}%)`)
+      .join('; ');
     updateInterpretation(
-      interpretation.title,
-      interpretation.description,
-      interpretation.detail + distanceNote,
-      'Catatan: Nomor cluster bukan diagnosis. Komposisi di atas mengacu pada 460 data testing dari model K-Means saat ini; jika model di-training ulang atau nomor cluster berubah, interpretasi harus dihitung ulang.'
+      profile.title || `BIRCH — Cluster ${cluster}`,
+      profile.description || 'Kondisi getaran dikelompokkan berdasarkan pola kesamaan fitur.',
+      `Komposisi pada ${profile.sample_count} anggota cluster dari ${profile.total_test_samples} data testing: ${mix}.`,
+      'Persentase di atas adalah distribusi kelas asli pada DATA TEST, BUKAN tingkat keyakinan diagnosis untuk input ini.'
     );
   }
 
@@ -193,19 +183,19 @@
   }
 
   function renderUnsupervised(result) {
-    predictionCaption.textContent = 'CLUSTER TERPILIH';
+    predictionCaption.textContent = 'CLUSTER BIRCH TERPILIH';
     predictionLabel.textContent = result.label || `Cluster ${result.cluster}`;
     predictionNote.textContent = result.note || '';
     unsupervisedExplanation(result);
-    chartTitle.textContent = 'Jarak ke pusat cluster';
-    const points = (result.distances || []).map(item => ({
-      label: `Cluster ${item.cluster}`, value: Number(item.distance)
-    }));
-    const max = Math.max(...points.map(p => p.value), 0.000001);
-    chartBars(points, max, value => value.toFixed(2));
+    chartTitle.textContent = 'Komposisi kelas pada cluster (data testing)';
+    const profile = result.cluster_profile;
+    const points = profile && Array.isArray(profile.composition)
+      ? profile.composition.map(item => ({label: item.label, value: Number(item.share)}))
+      : [];
+    chartBars(points, 1, value => `${(value * 100).toFixed(1)}%`);
     chartFootnote.textContent = points.length
-      ? 'Jarak lebih kecil berarti lebih dekat ke pusat cluster dalam ruang fitur model.'
-      : 'Model tidak menyediakan transform(), sehingga grafik jarak tidak tersedia.';
+      ? `Profil ${profile.sample_count} sampel data testing yang masuk cluster ini; bukan probabilitas kerusakan input baru.`
+      : 'Profil kelas historis tidak tersedia untuk versi model ini. Grafik tidak ditampilkan.';
   }
 
   form.addEventListener('submit', async event => {

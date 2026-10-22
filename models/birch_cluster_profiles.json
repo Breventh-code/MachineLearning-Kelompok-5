@@ -1,0 +1,45 @@
+{
+  "algorithm": "BIRCH",
+  "model_filename": "best_unsupervised_model.pkl",
+  "model_sha256": "cd28e755c3f3592ed44bea2d3bf99c4588330078f9651079eb163a76b8b8b9dd",
+  "source": "Tabulasi model BIRCH pada 460 sampel test CWRU yang diberikan tim",
+  "n_test_samples": 460,
+  "metrics": {
+    "silhouette": 0.5457533863037859,
+    "davies_bouldin": 0.6481979605562426,
+    "adjusted_rand_index": 0.09047406856923465,
+    "normalized_mutual_information": 0.2761939332751858
+  },
+  "cluster_profiles": {
+    "0": {
+      "title": "Cluster 0 — Kondisi Getaran Campuran",
+      "description": "Kelompok ini memuat seluruh sampel Normal, Ball, dan IR pada data testing, serta sebagian sampel OR. Tidak dapat diperlakukan sebagai kelas Normal ataupun diagnosis kerusakan tertentu.",
+      "counts": {
+        "Ball": 138,
+        "IR": 138,
+        "Normal": 46,
+        "OR": 57
+      }
+    },
+    "1": {
+      "title": "Cluster 1 — Kelompok khusus OR pada pengujian",
+      "description": "Seluruh anggota Cluster 1 pada 460 data testing berlabel Outer Race (OR). Ini menunjukkan kelompok getaran khas pada data evaluasi, tetapi bukan bukti bahwa setiap input baru pasti OR.",
+      "counts": {
+        "Ball": 0,
+        "IR": 0,
+        "Normal": 0,
+        "OR": 32
+      }
+    },
+    "2": {
+      "title": "Cluster 2 — Kelompok OR lain pada pengujian",
+      "description": "Seluruh anggota Cluster 2 pada 460 data testing juga berlabel Outer Race (OR). Kelompok ini berbeda dari Cluster 1 pada ruang fitur; fitur pembeda pastinya memerlukan analisis profil centroid.",
+      "counts": {
+        "Ball": 0,
+        "IR": 0,
+        "Normal": 0,
+        "OR": 49
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ baru dan menerapkan scaler yang dibuat Data Engineer, tepat satu kali.
 joblib.load() hanya aman digunakan pada artefak yang dipercaya.
 """
 import json
+import hashlib
 from functools import lru_cache
 from pathlib import Path
 
@@ -15,14 +16,16 @@ import numpy as np
 import pandas as pd
 
 from preprocessing import FEATURES, transform_input
+from sklearn.cluster import Birch
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = ROOT / "models"
 MODEL_PATHS = {
     "supervised": MODELS_DIR / "random_forest_pipeline.pkl",
-    "unsupervised": MODELS_DIR / "kmeans_pipeline.pkl",
+    "unsupervised": MODELS_DIR / "best_unsupervised_model.pkl",
 }
 REQUIRED_PREPROCESSING = ("scaler.pkl", "label_encoder.pkl", "feature_list.json")
+BIRCH_PROFILE = MODELS_DIR / "birch_cluster_profiles.json"
 
 
 class ModelUnavailable(Exception):
@@ -68,6 +71,8 @@ def load_model(kind):
         model = _load_artifact(path)
     except Exception as exc:
         raise ModelUnavailable(f"Model {path.name} gagal dibaca. Periksa model dan versi library.") from exc
+    if kind == "unsupervised" and not isinstance(model, Birch):
+        raise ModelUnavailable("File unsupervised harus berisi model BIRCH hasil training.")
     if not hasattr(model, "predict"):
         raise ModelUnavailable(f"{path.name} tidak memiliki method predict().")
     n_features = getattr(model, "n_features_in_", None)
@@ -81,7 +86,7 @@ def get_model_status():
     for kind, path in MODEL_PATHS.items():
         try:
             load_model(kind)
-            result[kind] = {"ready": True, "filename": path.name, "message": "Model siap digunakan."}
+            result[kind] = {"ready": True, "filename": path.name, "algorithm": "BIRCH" if kind == "unsupervised" else "Random Forest", "message": "Model siap digunakan."}
         except ModelUnavailable as exc:
             result[kind] = {"ready": False, "filename": path.name, "message": str(exc)}
     return result
@@ -146,24 +151,59 @@ def predict_supervised(features):
         raise ModelPredictionError("Klasifikasi gagal. Cek kecocokan model dengan 13 fitur scaled.") from exc
 
 
+def _read_birch_profile(cluster_id):
+    """Read empirical TEST composition only for exactly the bundled BIRCH model.
+
+    Do not use the composition if a different model was deployed or retrained:
+    cluster IDs are arbitrary and may change.
+    """
+    try:
+        raw = BIRCH_PROFILE.read_text(encoding="utf-8")
+        info = json.loads(raw)
+        model_path = MODEL_PATHS["unsupervised"]
+        digest = hashlib.sha256(model_path.read_bytes()).hexdigest()
+        if info.get("model_sha256") != digest:
+            return None
+        record = info.get("cluster_profiles", {}).get(str(cluster_id))
+        if not isinstance(record, dict):
+            return None
+        counts = record["counts"]
+        total = sum(int(v) for v in counts.values())
+        if total < 1:
+            return None
+        composition = [
+            {"label": label, "count": int(counts.get(label, 0)),
+             "share": round(int(counts.get(label, 0)) / total, 6)}
+            for label in ("Ball", "IR", "Normal", "OR")
+        ]
+        return {
+            "title": str(record["title"]),
+            "description": str(record["description"]),
+            "sample_count": total,
+            "total_test_samples": int(info["n_test_samples"]),
+            "composition": composition,
+            "source": str(info["source"]),
+        }
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def predict_unsupervised(features):
+    """Predict a BIRCH cluster for 13 scaled features, NOT a fault class."""
     model = load_model("unsupervised")
     X = _prepare_features(features)
     try:
-        cluster_id = int(model.predict(X)[0])
-        distances = []
-        if hasattr(model, "transform"):
-            try:
-                distance_row = np.ravel(model.transform(X))
-                distances = [{"cluster": i, "distance": round(float(d), 6)}
-                             for i, d in enumerate(distance_row)]
-            except (AttributeError, TypeError, ValueError):
-                pass
+        # BIRCH was fitted on ndarray. Keep feature order from preprocessing.py;
+        # passing ndarray avoids feature-name warning without changing scaling.
+        cluster_id = int(model.predict(X.to_numpy(dtype=float))[0])
+        profile = _read_birch_profile(cluster_id)
         return {
+            "algorithm": "BIRCH",
             "cluster": cluster_id,
             "label": f"Cluster {cluster_id}",
-            "distances": distances,
-            "note": "Nomor cluster bukan label jenis kerusakan tanpa validasi interpretasi.",
+            "cluster_profile": profile,
+            "distances": [],  # BIRCH has no KMeans-like transform-to-K-centroids API.
+            "note": "Kelompok pola getaran, bukan klasifikasi kondisi bearing. Persentase profil berasal dari DATA TEST, bukan probabilitas input.",
         }
     except Exception as exc:
-        raise ModelPredictionError("Clustering gagal. Cek kecocokan KMeans dengan 13 fitur scaled.") from exc
+        raise ModelPredictionError("Prediksi BIRCH gagal. Periksa kesesuaian model dengan 13 fitur terstandardisasi.") from exc

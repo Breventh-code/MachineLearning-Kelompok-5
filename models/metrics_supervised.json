@@ -1,0 +1,34 @@
+{
+    "algorithm": "Random Forest",
+    "accuracy": 0.9543478260869566,
+    "f1_macro": 0.9617236707610253,
+    "best_cv_f1_macro": 0.9741238045649219,
+    "best_parameters": {
+        "n_estimators": 200,
+        "min_samples_split": 5,
+        "min_samples_leaf": 1,
+        "max_depth": null,
+        "class_weight": null
+    },
+    "features": [
+        "max",
+        "min",
+        "mean",
+        "sd",
+        "rms",
+        "skewness",
+        "kurtosis",
+        "crest",
+        "form",
+        "peak_to_peak",
+        "abs_peak",
+        "energy",
+        "sd_rms_ratio"
+    ],
+    "classes": [
+        "Ball",
+        "IR",
+        "Normal",
+        "OR"
+    ]
+}

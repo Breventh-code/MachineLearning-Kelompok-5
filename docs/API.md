@@ -34,5 +34,7 @@ Backend memvalidasi 9 input, menghitung `peak_to_peak`, `abs_peak`, `energy = rm
 - `500`: error dalam preprocessing atau prediksi.
 
 Supervised: `result.prediction`, `result.label`, `result.probabilities`.
-Unsupervised: `result.cluster`, `result.label`, `result.distances`.
+Unsupervised (BIRCH): `result.algorithm`, `result.cluster`, `result.label`, `result.cluster_profile`, `result.note`. `result.distances` dipertahankan sebagai array kosong untuk kompatibilitas API lama.
+
+`cluster_profile` memuat komposisi label historis pada 460 data testing, HANYA jika hash model sesuai. Proporsi komposisi bukan probabilitas kerusakan untuk input baru.
 Cluster tidak boleh diperlakukan sebagai label kerusakan tanpa analisis tambahan.

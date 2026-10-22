@@ -7,7 +7,7 @@ import pytest
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans
+from sklearn.cluster import Birch
 from sklearn.ensemble import RandomForestClassifier
 
 from preprocessing import BASE_FEATURES, FEATURES, run_pipeline, transform_input
@@ -49,17 +49,19 @@ def test_preprocessing_and_both_model_contracts(tmp_path, monkeypatch):
     np.testing.assert_allclose(actual, expected)
 
     rf = RandomForestClassifier(n_estimators=8, random_state=42).fit(out["X_train"], out["y_train"])
-    km = KMeans(n_clusters=4, random_state=42, n_init=10).fit(out["X_train"])
+    km = Birch(n_clusters=3, threshold=0.8).fit(out["X_train"].to_numpy())
     joblib.dump(rf, model_dir / "random_forest_pipeline.pkl")
-    joblib.dump(km, model_dir / "kmeans_pipeline.pkl")
+    joblib.dump(km, model_dir / "best_unsupervised_model.pkl")
     monkeypatch.setattr(svc, "MODELS_DIR", model_dir)
     monkeypatch.setattr(svc, "MODEL_PATHS", {
         "supervised": model_dir / "random_forest_pipeline.pkl",
-        "unsupervised": model_dir / "kmeans_pipeline.pkl",
+        "unsupervised": model_dir / "best_unsupervised_model.pkl",
     })
     sup = svc.predict_supervised(raw_input)
     unsup = svc.predict_unsupervised(raw_input)
     assert sup["label"] in {"Ball", "IR", "Normal", "OR"}
     assert sum(p["probability"] for p in sup["probabilities"]) == pytest.approx(1, abs=1e-5)
     assert isinstance(unsup["cluster"], int)
-    assert len(unsup["distances"]) == 4
+    assert unsup["algorithm"] == "BIRCH"
+    assert unsup["distances"] == []
+    assert unsup["cluster_profile"] is None

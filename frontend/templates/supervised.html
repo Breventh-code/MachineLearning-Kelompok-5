@@ -1,8 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Supervised Learning{% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/analysis.js') }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/analysis.js', v='penjelasan-v2') }}" defer></script>{% endblock %}
 {% block content %}
 <section class="page-heading"><div><span class="eyebrow"><span class="eyebrow-line"></span> MODULE 01 / SUPERVISED LEARNING</span><h1>Deteksi jenis <span class="gradient-word">kerusakan bearing.</span></h1><p>Model Random Forest mengklasifikasikan jenis kondisi bearing berdasarkan sembilan fitur statistik CWRU dan empat fitur turunan.</p></div><span class="algorithm-tag">Random Forest <span>↗</span></span></section>
 <div class="status-bar"><div class="status-summary"><span class="online-dot"></span><strong>Status model supervised</strong></div><span data-model-status="supervised" role="status">Memeriksa model…</span></div>
 <section class="analysis-layout"><div class="form-panel">{% set mode = 'supervised' %}{% set endpoint = url_for('web.supervised_api') %}{% set button_text = 'Jalankan klasifikasi' %}{% include '_feature_form.html' %}</div><div>{% set result_label = 'klasifikasi' %}{% include '_result.html' %}<div class="side-note"><b>Interpretasi output</b><p>Model dapat menghasilkan Normal, IR (Inner Race), OR (Outer Race), atau Ball sesuai label training. Grafik menampilkan probabilitas jika model mendukung <code>predict_proba()</code>.</p></div></div></section>
+<section aria-labelledby="condition-guide-title" style="margin-top:28px; padding:22px 24px; border:1px solid rgba(120,130,145,.22); border-radius:18px; background:var(--panel, rgba(255,255,255,.025));">
+  <div style="margin-bottom:8px; font-size:.76rem; letter-spacing:.08em; opacity:.72;">PANDUAN HASIL KLASIFIKASI</div>
+  <h2 id="condition-guide-title" style="margin:0 0 8px; font-size:1.25rem;">Keterangan setiap kondisi bearing</h2>
+  <p style="margin:0 0 8px; opacity:.78;">Model memprediksi salah satu kondisi berikut berdasarkan fitur sinyal getaran yang dimasukkan.</p>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0 22px;">
+    <div style="padding:16px 0; border-bottom:1px solid rgba(120,130,145,.2);"><strong style="display:block; margin-bottom:5px;">Normal</strong><span style="opacity:.78;">Model memprediksi bearing berada dalam kondisi normal.</span></div>
+    <div style="padding:16px 0; border-bottom:1px solid rgba(120,130,145,.2);"><strong style="display:block; margin-bottom:5px;">Ball</strong><span style="opacity:.78;">Model memprediksi kerusakan pada elemen bola bearing.</span></div>
+    <div style="padding:16px 0;"><strong style="display:block; margin-bottom:5px;">IR — Inner Race</strong><span style="opacity:.78;">Model memprediksi kerusakan pada jalur bagian dalam bearing.</span></div>
+    <div style="padding:16px 0;"><strong style="display:block; margin-bottom:5px;">OR — Outer Race</strong><span style="opacity:.78;">Model memprediksi kerusakan pada jalur bagian luar bearing.</span></div>
+  </div>
+</section>
 {% endblock %}

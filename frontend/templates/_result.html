@@ -4,6 +4,13 @@
   <div id="resultLoaded" class="is-hidden">
     <div class="output-label" id="predictionCaption">HASIL</div>
     <div class="prediction-pill" id="predictionLabel" aria-live="polite">—</div>
+    <section id="interpretationBox" aria-label="Penjelasan prediksi model" style="margin:18px 0; padding:18px 20px; border:1px solid rgba(120,130,145,.24); border-radius:15px; background:rgba(100,150,170,.07);">
+      <div style="font-size:.75rem; letter-spacing:.08em; font-weight:700; opacity:.78; margin-bottom:7px;">INTERPRETASI OTOMATIS • SESUAI HASIL</div>
+      <h3 id="interpretationTitle" style="font-size:1.05rem; line-height:1.4; margin:0 0 9px;">Penjelasan hasil</h3>
+      <p id="interpretationDescription" style="line-height:1.65; margin:0 0 10px;"></p>
+      <p id="interpretationDetail" style="line-height:1.65; margin:0 0 10px; opacity:.9;"></p>
+      <p id="interpretationCaution" style="font-size:.84rem; line-height:1.6; opacity:.72; margin:0;"></p>
+    </section>
     <p class="prediction-explain" id="predictionNote"></p>
     <div class="chart-topline"><h3 id="chartTitle">Grafik model</h3><span class="small-indicator">BERDASARKAN MODEL</span></div>
     <div class="plot-wrap"><canvas id="resultChart" role="img" aria-label="Grafik hasil prediksi"></canvas></div>
